@@ -1,35 +1,35 @@
-import { Route, Routes } from "react-router-dom";
-import { Suspense, lazy } from "react";
-import Loader from "./components/Loader/Loader";
-import Layout from "./components/Layout/Layout";
-
-const HomePage = lazy(() => import("./pages/HomePage/HomePage"));
-const MoviesPage = lazy(() => import("./pages/MoviesPage/MoviesPage"));
-const NotFoundPage = lazy(() => import("./pages/NotFoundPage/NotFoundPage"));
-const MovieDetailsPage = lazy(() =>
-  import("./pages/MovieDetailsPage/MovieDetailsPage")
-);
-
-const MovieReviews = lazy(() =>
-  import("./components/MovieReviews/MovieReviews")
-);
-const MovieCast = lazy(() => import("./components/MovieCast/MovieCast"));
+import ContactList from "./components/ContactList/ContactList";
+import SearchBox from "./components/SearchBox/SearchBox";
+import "./App.css";
+import ContactForm from "./components/ContactForm/ContactForm";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchContacts } from "./redux/contactsOps";
+import { selectError, selectIsLoading } from "./redux/contactsSlice";
 
 function App() {
+  const dispatch = useDispatch();
+  const isLoading = useSelector(selectIsLoading);
+  const error = useSelector(selectError);
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
   return (
-    <Layout>
-      <Suspense fallback={<Loader />}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/movies" element={<MoviesPage />} />
-          <Route path="/movies/:movieId/*" element={<MovieDetailsPage />}>
-            <Route path="cast" element={<MovieCast />} />
-            <Route path="reviews" element={<MovieReviews />} />
-          </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
-    </Layout>
+    <div className="container">
+      <h1>Phonebook</h1>
+      <ContactForm />
+      <SearchBox />
+      {isLoading && !error && <b>Request in progress...</b>}
+      {error && (
+        <b>
+          There is a problem with the connection to the server, please try again
+          later
+        </b>
+      )}
+      <ContactList />
+    </div>
   );
 }
 
